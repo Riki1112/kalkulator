@@ -1,41 +1,41 @@
+import streamlit as st
 import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
 
-def main():
-    print("=== Kalkulator Turunan dan Integral ===")
-    expr_str = input("Masukkan fungsi (misal: x**2 + 3*x - 5): ")
+st.set_page_config(page_title="Kalkulator Integral dan Turunan")
 
-    x = sp.symbols('x')
-    try:
-        expr = sp.sympify(expr_str)
+st.title("🧮 Kalkulator Integral dan Turunan")
+st.markdown("Masukkan fungsi aljabar dalam variabel `x`. Contoh: `x**2 + 3*x - 5`")
 
-        # Turunan dan Integral
-        deriv = sp.diff(expr, x)
-        integ = sp.integrate(expr, x)
+# Input fungsi
+expr_str = st.text_input("Fungsi f(x):", "x**2 + 3*x - 5")
 
-        print(f"\nFungsi asli     : {expr}")
-        print(f"Turunan simbolik: {deriv}")
-        print(f"Integral simbolik: {integ} + C")
+x = sp.symbols('x')
 
-        # Evaluasi numerik (opsional)
-        val = float(input("\nMasukkan nilai x untuk evaluasi numerik: "))
-        f_val = expr.subs(x, val)
-        d_val = deriv.subs(x, val)
-        i_val = integ.subs(x, val)
+try:
+    expr = sp.sympify(expr_str)
+    deriv = sp.diff(expr, x)
+    integ = sp.integrate(expr, x)
 
-        print(f"f({val}) = {f_val}")
-        print(f"f'({val}) = {d_val}")
-        print(f"Integral hingga x={val} = {i_val}")
+    st.subheader("📘 Hasil Simbolik")
+    st.latex(f"f(x) = {sp.latex(expr)}")
+    st.latex(f"f'(x) = {sp.latex(deriv)}")
+    st.latex(f"\\int f(x)\\,dx = {sp.latex(integ)} + C")
 
-        # Bonus: Grafik
-        plot_graph(expr, deriv)
+    # Evaluasi numerik
+    st.subheader("🔢 Evaluasi Numerik")
+    val = st.number_input("Masukkan nilai x:", value=1.0)
+    f_val = expr.subs(x, val)
+    d_val = deriv.subs(x, val)
+    i_val = integ.subs(x, val)
 
-    except Exception as e:
-        print(f"Terjadi kesalahan: {e}")
+    st.write(f"f({val}) = `{f_val}`")
+    st.write(f"f'({val}) = `{d_val}`")
+    st.write(f"Integral hingga x = {val} adalah `{i_val}`")
 
-def plot_graph(expr, deriv):
-    x = sp.symbols('x')
+    # Grafik
+    st.subheader("📈 Grafik Fungsi dan Turunan")
     f_lambd = sp.lambdify(x, expr, 'numpy')
     d_lambd = sp.lambdify(x, deriv, 'numpy')
 
@@ -43,15 +43,13 @@ def plot_graph(expr, deriv):
     y_vals = f_lambd(x_vals)
     dy_vals = d_lambd(x_vals)
 
-    plt.figure(figsize=(10, 5))
-    plt.plot(x_vals, y_vals, label='Fungsi Asli f(x)')
-    plt.plot(x_vals, dy_vals, label="Turunan f'(x)", linestyle='--')
-    plt.title("Grafik Fungsi dan Turunan")
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    fig, ax = plt.subplots()
+    ax.plot(x_vals, y_vals, label='f(x)')
+    ax.plot(x_vals, dy_vals, label="f'(x)", linestyle='--')
+    ax.set_title("Grafik Fungsi dan Turunan")
+    ax.legend()
+    ax.grid(True)
+    st.pyplot(fig)
 
-if __name__ == '__main__':
-    main()
+except Exception as e:
+    st.error(f"Terjadi kesalahan: {e}")
